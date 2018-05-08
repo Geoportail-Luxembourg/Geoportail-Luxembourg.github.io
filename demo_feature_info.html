@@ -1,0 +1,129 @@
+<html>
+<head>
+<script src="//apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+</head>
+<body>
+<div id="theParcels" ></div>
+<div id="map"></div>
+
+<script>
+selectedParcels = new ol.Collection();;
+var fillStyle = new ol.style.Fill({
+    color: [255, 255, 0, 0.6]
+});
+
+var strokeStyle = new ol.style.Stroke({
+    color: [255, 155, 55, 1],
+    width: 3
+});
+
+vectorStyle_ = new ol.style.Style({
+    fill: fillStyle,
+    stroke: strokeStyle,
+    image: new ol.style.Circle({
+      radius: 10,
+      fill: fillStyle,
+      stroke: strokeStyle
+    })
+});
+  
+map = new lux.Map({
+    target: 'map',
+    bgLayer: 'blank',
+    layers: ['parcels','parcels_labels'],
+    search      : {
+      target: 'map',
+      dataSets : ['Adresse', 'Parcelle'],
+      onSelect : function(e, term, item, clearButton) {
+        onSelectParcel(e, term, item, clearButton);
+       }.bind(this)
+    }
+  });
+searchLayer_ = new ol.layer.Vector({
+    source: new ol.source.Vector({features:selectedParcels}),
+    map: map,
+    style: vectorStyle_
+  });
+
+  map.on("singleclick", handleSingleclickEvent_, this);
+  function  onSelectParcel (e, term, item, clearButton, evt) {
+
+
+  var coord = null;
+  var layer = null;
+  var queryExtent = null;
+  if (evt !== undefined) {
+    coord = map.getCoordinateFromPixel([evt.pixel[0], evt.pixel[1]]);
+    queryExtent = new ol.geom.Point(ol.proj.transform(coord, 'EPSG:3857', 'EPSG:2169')).getExtent();
+    layer = 'click';
+  } else {
+    coord = item.getAttribute('data-coord').split(',').map(parseFloat);
+    layer = item.getAttribute('data-layer');
+    if (coord.length === 2) {
+      queryExtent = new ol.geom.Point(ol.proj.transform(coord, 'EPSG:4326', 'EPSG:2169')).getExtent();
+    } else {
+      var coords2169 = [];
+      for (i = 0; i < coord.length; i = i+2) {
+        coords2169.push(ol.proj.transform([coord[i],coord[i+1]] , 'EPSG:4326', 'EPSG:2169'));
+      }
+      var geometry  = new ol.geom.Polygon([coords2169]);
+      queryExtent = geometry.getInteriorPoint().getExtent();
+    }
+  }
+  queryExtent[2] = queryExtent[2] + 0.01;
+  queryExtent[3] = queryExtent[3] + 0.01;
+
+  fetch("https://apiv3.geoportail.lu/getfeatureinfo?tooltip=0&lang=&layers=359&box1="+queryExtent.join(',')+"&box2="+queryExtent.join(',')).then(function(resp) {
+    return resp.json();
+  }).then(function(data) {
+        var label = data[0].features[0].attributes.label;
+        if (layer === 'Adresse') {
+          label = label + "(" + term + ")";
+        }
+        var id = data[0].features[0].attributes.id;
+        var curFeature = (new ol.format.GeoJSON().readFeature(data[0].features[0].geometry, {dataProjection:'EPSG:2169', featureProjection: 'EPSG:3857'}));
+
+        curFeature.set('id', id);
+        curFeature.set('label', label);
+        var found = false;
+        var foundElem = null;
+        selectedParcels.forEach(function(elem) {
+          if (elem.get('id') == curFeature.get('id')) {
+            found = true;
+            foundElem = elem;
+          }
+        }.bind(this));
+        if (!found) {
+          selectedParcels.push(curFeature);
+        } else {
+          if (layer === 'click') {
+            selectedParcels.remove(foundElem);
+          }
+        }
+        if (selectedParcels.getLength() > 0) {
+          var curExtent = searchLayer_.getSource().getExtent();
+          if (curExtent !== undefined && curExtent[0] !== Infinity) {
+            map.getView().fit(
+              ol.geom.Polygon.fromExtent(curExtent),
+              /** @type {olx.view.FitOptions} */ ({
+                size: /** @type {Array<number>} */ (map.getSize()),
+                maxZoom: 17
+              })
+            );
+          }
+        }
+        var txt = "<ul>";
+        selectedParcels.forEach(function(curParcel) {
+          txt = txt + "<li>" + curParcel.get('label')  + "</li>";
+        });
+        txt = txt + "</ul>"
+        document.getElementById('theParcels').innerHTML = txt;
+    }.bind(this));
+  }
+  function handleSingleclickEvent_(evt) {
+    onSelectParcel (undefined, undefined, undefined, undefined, evt);
+  }
+
+</script>
+</body>
+</html>
