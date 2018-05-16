@@ -73,7 +73,8 @@ viewer.terrainProvider = cesiumTerrainProviderMeshes;
         throw(error);
     });
     
-    
+     var center = Cesium.Cartesian3.fromDegrees(6.15001,9.86493 );
+     viewer.camera.lookAt(center, new Cesium.Cartesian3(0.0, 0.0, 4200000.0));
  </script>
 </body>
 </html>
