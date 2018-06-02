@@ -270,9 +270,10 @@ function displayTooltip(evt) {
 
 var map = new lux.Map({
   target: 'map',
-  bgLayer: 'basemap_2015_global',
+  bgLayer: 'voidLayer',
   zoom: 12,
-  position: [76825, 75133]
+  position: [76825, 75133],
+  layers: [1459]
 });
 
 var tooltip = document.getElementById('tooltip');
