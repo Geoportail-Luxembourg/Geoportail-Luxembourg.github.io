@@ -41,6 +41,24 @@
         min-width: 120px;
         line-height: 1.5em;
     }
+        
+    #lm {
+        position: absolute;
+     top: 50px;
+     right: 5%;
+        z-index: 5;
+        background-color: rgba(50, 50, 50, 0.5);
+        color: #ffffff;
+        text-align: left;
+        font-family: 'Roboto', 'sans-serif';
+        padding: 0;
+        margin: 0;
+     font-size: 1.5em;
+     font-weight: bold;
+        border: 1px solid transparent;
+        min-width: 120px;
+        line-height: 1.5em;
+    }
 
     #topcorner .row {
         margin-top: 0.8vmin;
@@ -194,6 +212,10 @@
     <div class="row">Distance:<br>
    <div id="distance"></div></div>
 </div>
+    
+<div id="lm">
+    
+</div>
 
 
 <div id="loading">Loading ..</div>
@@ -273,7 +295,8 @@ var map = new lux.Map({
   bgLayer: 'blank',
   zoom: 7,
   position: [76825, 75133],
-  layers: [1459,349]
+  layers: [1459,349],
+  layermanager:'lm'
 });
 
 var tooltip = document.getElementById('tooltip');
