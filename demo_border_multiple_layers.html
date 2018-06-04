@@ -214,9 +214,9 @@
    <div id="distance"></div></div>
 </div>
     
-<!--<div id="lm">
+<div id="lm">
     
-</div>-->
+</div>
 
 
 <div id="loading">Loading ..</div>
@@ -297,9 +297,9 @@ var map = new lux.Map({
   zoom: 7,
   position: [76825, 75133],
   layers: [1459,349]
-  //,layerManager: {
-  //    target: 'lm'
-  //}
+  ,layerManager: {
+      target: 'lm'
+  }
 });
 
 var tooltip = document.getElementById('tooltip');
@@ -312,23 +312,24 @@ map.addOverlay(overlay);
 map.on('pointermove', displayTooltip);
 
 function createLayer(pointColor) {
-    var imageStyle = new ol.style.Style({
-    image: new ol.style.Circle({
-      radius: 5,
-      snapToPixel: false,
-      fill: new ol.style.Fill({color: pointColor}),
-      stroke: new ol.style.Stroke({color: 'white', width: 1})
-    })
-  });
+   var imageStyle = new ol.style.Style({
+   image: new ol.style.Circle({
+     radius: 5,
+     snapToPixel: false,
+     fill: new ol.style.Fill({color: pointColor}),
+     stroke: new ol.style.Stroke({color: 'white', width: 1})
+   })
+ });
 
-    var positionSource = new ol.source.Vector({wrapX: false});
-    var positionLayer = new ol.layer.Vector({
-        source: positionSource,
-        style: imageStyle
-    });
+   var positionSource = new ol.source.Vector({wrapX: false});
+   var positionLayer = new ol.layer.Vector({
+       source: positionSource,
+       style: imageStyle,
+       map: map
+   });
 
-    map.addLayer(positionLayer);
-    return positionSource
+   //map.addLayer(positionLayer);
+   return positionSource
 }
 var position2 = [ 6.367662, 49.460796 ];
 map.showMarker(  
