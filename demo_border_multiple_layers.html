@@ -44,6 +44,7 @@
         
     #lm {
         position: absolute;
+        height: 50px;
      top: 50px;
      right: 5%;
         z-index: 5;
@@ -296,7 +297,9 @@ var map = new lux.Map({
   zoom: 7,
   position: [76825, 75133],
   layers: [1459,349],
-  layermanager:'lm'
+  layermanager: {
+      target: 'lm'
+  }
 });
 
 var tooltip = document.getElementById('tooltip');
