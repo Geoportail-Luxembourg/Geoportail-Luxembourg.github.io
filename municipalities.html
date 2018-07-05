@@ -5,13 +5,13 @@
   <body>
     <div id="map1"></div>
     <script>
-      var curMap = new lux.Map({
+      var map = new lux.Map({
         target: 'map1',
-        bgLayer: 'basemap_2015_global',
-        zoom: 8,
-        position: [80000, 80000]
+        bgLayer: 'streets_jpeg',
+        zoom: 12,
+        position: [76825, 75133]
       });
-      curMap.addKML('communes.kml');
+      map.addKML('communes.kml',{reloadInterval: 60, click:true});
     </script>
   </body>
 </html>
