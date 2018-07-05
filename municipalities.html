@@ -7,11 +7,11 @@
     <script>
       var map = new lux.Map({
         target: 'map1',
-        bgLayer: 'basemap_2015_global',
+        bgLayer: 'streets_jpeg',
         zoom: 8,
         position: [76825, 75133]
       });
-      map.addKML('communes.kml',{reloadInterval: 60, click:true});
+      map.addGeoJSON('communes.geojson',{reloadInterval: 60, click:true});
     </script>
   </body>
 </html>
