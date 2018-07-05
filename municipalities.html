@@ -7,12 +7,12 @@
     <script>
       var curMap = new lux.Map({
         target: 'map1',
-        bgLayer: 'topo_bw_jpeg',
-        zoom: 12,
-        position: [76825, 75133]
+        bgLayer: 'basemap_2015_global',
+        zoom: 8,
+        position: [80000, 80000]
       });
       curMap.addGeoJSON({
-        url: 'https://download.data.public.lu/resources/limites-administratives-du-grand-duche-de-luxembourg/20180702-053034/communes.geojson'
+        url: 'communes.geojson'
       });
     </script>
   </body>
