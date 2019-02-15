@@ -1,0 +1,56 @@
+<html>
+<head>
+    <title>geoportail.lu API v3 samples</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="https://apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+    <style>.maclasse {display:flex;align-items:center;}</style>
+</head>
+<body>
+<div id="map2c"></div>
+<div id="info2c"></div>
+ <script>
+var position = [75977, 75099 ];
+var map2c = new lux.Map({
+  position: position,
+  target: 'map2c',
+  bgLayer: 'basemap_2015_global',
+  zoom: 18
+});
+var markerOverlay = map2c.showMarker({
+   position: [75977, 75099 ],
+  positioning: 'center-center',
+   iconURL: '//apps.geoportail.lu/exemple_api/exemplesWikiGeoAPI/lion.png',
+   click: true,
+});
+
+
+var popup;
+markerOverlay.element.addEventListener('mousemove', (function(event) {
+    var cb = function() {
+      map2c.removeOverlay(popup);
+    }.bind(this);
+    
+    if (!popup) {
+        var element = lux.buildPopupLayout("new content number " + Date.now());
+        popup = new ol.Overlay({
+          element: element,
+          position: markerOverlay.getPosition(),
+          positioning: 'bottom-center',
+          offset: [0, -20],
+          insertFirst: false
+        });
+    }
+  popup.setPosition(markerOverlay.getPosition());
+  map2c.addOverlay(popup);
+  map2c.renderSync();
+  }));
+
+markerOverlay.element.addEventListener( 'mouseout', function() {
+  if (popup) {
+    map2c.removeOverlay(popup);
+    popup = undefined;
+  }
+}.bind(this));
+</script>
+</body>
+</html>
