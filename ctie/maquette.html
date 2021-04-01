@@ -17,7 +17,8 @@
             <div id="layerManager" ></div><br>
             <div id="info"></div><br>
             <button onclick="exportgeojson()">Export Geojson selected element</button><br>
-            <button onclick="exportgeojsondrawing()">Export Geojson Dessin</button><br>
+            <button onclick="exportgeojsondrawing()">Export Geojson drawings</button><br>
+            <button onclick="exportgeojsonDrawingAndSection()">Export Geojson drawings and selection </button><br>
             <button onclick="addInteractions('Point')">Draw a point</button><br>
             <button onclick="addInteractions('Polygon')">Draw a polygon</button><br>
             <button onclick="addInteractions('LineString')">Draw a line</button><br>
@@ -56,7 +57,10 @@ var map = new lux.Map({
   zoomToExtent: true,
   search      : {
     target : 'search',
-    dataSets : ['Adresse', 'FLIK', 'Parcelle', 'Commune']
+    dataSets : ['Adresse', 'FLIK', 'Parcelle', 'Commune'],
+    onSelect: function(e, term, item, clearButton) {
+        geocode(e, term, item, clearButton);
+       }.bind(this)
   },
   layerManager: {
     target: 'layerManager'
@@ -65,7 +69,13 @@ var map = new lux.Map({
    popupTarget: 'info',
    layerInfoCallback: infoCb
 });
-
+function geocode(e, term, item, clearButton) {
+  lux.geocode({
+    queryString: term
+  }).then(function(resp){
+    console.log(resp.results[0].AddressDetails);
+  });
+}
 function removeInteractions() {
     map.disableDrawTool();
 }
@@ -130,13 +140,16 @@ function loadgeojson() {
 }
 
 function exportgeojson() {
-    var writer = new ol.format.GeoJSON();
-    var geojsonStr = writer.writeFeatures(map.getShowLayer().getSource().getFeatures());
+    var geojsonStr = map.exportGeoJSON(map.getShowLayer().getSource().getFeatures());
     document.getElementById('info').innerHTML = geojsonStr;
 }
 function exportgeojsondrawing() {
-    var writer = new ol.format.GeoJSON();
-    var geojsonStr = writer.writeFeatures(map.getDrawingLayer().getSource().getFeatures());
+    var geojsonStr = map.exportGeoJSON(map.getDrawingLayer().getSource().getFeatures());
+    document.getElementById('info').innerHTML = geojsonStr;
+}
+function exportgeojsonDrawingAndSection() {
+    var array = map.getDrawingLayer().getSource().getFeatures().concat(map.getShowLayer().getSource().getFeatures());
+    var geojsonStr = map.exportGeoJSON(array);
     document.getElementById('info').innerHTML = geojsonStr;
 }
 
@@ -147,7 +160,7 @@ function checkSelfIntersect(geom) {
 };
 
 function printPDF() {
-  document.getElementById("imageId").src = "http://apiv3.geoportail.lu/printproxy/report_create_and_get.png?spec="+encodeURIComponent(JSON.stringify(map.getPrintSpec()));
+  document.getElementById("imageId").src = "http://devrm.geoportail.lu/printproxy/report_create_and_get.png?spec="+encodeURIComponent(JSON.stringify(map.getPrintSpec()));
 }
 
 </script>
