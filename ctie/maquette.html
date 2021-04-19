@@ -25,6 +25,10 @@
             <button onclick="removeInteractions()">Deactivate drawing tool</button><br>
             <button onclick="printPDF()">Get the image in PNG</button><br>
             <image id = "imageId" src="" width="100px"></image>
+            <form action="https://apiv3.geoportail.lu/printproxy/report_create_and_get.png" method="POST" target="_blank">
+                <input type="hidden" name="spec" value='{"attributes":{"map":{"dpi":127,"rotation":0,"center":[680435.8701662207,6379093.714826083],"projection":"EPSG:3857","scale":1693,"layers":[{"baseURL":"https://vectortiles.geoportail.lu/styles/roadmap_jsapi","type":"OSM","imageExtension":"png"}]},"disclaimer":"www.geoportail.lu est un portail d accès aux informations géolocalisées, données et services qui sont mis à disposition par les administrations publiques luxembourgeoises. Responsabilité: Malgré la grande attention qu’elles portent à la justesse des informations diffusées sur ce site, les autorités ne peuvent endosser aucune responsabilité quant à la fidélité, à l’exactitude, à l’actualité, à la fiabilité et à l’intégralité de ces informations. Information dépourvue de foi publique. \nDroits d auteur: Administration du Cadastre et de la Topographie. http://g-o.lu/copyright","scaleTitle":"Echelle approximative 1:","appTitle":"Le géoportail national du Grand-Duché du Luxembourg","scale":1693,"name":"","lang":"fr","legend":"","scalebar":{"geodetic":true},"dataOwner":"","dateText":"Date d impression: ","url":"","qrimage":"https://apiv3.geoportail.lu/qr?url=https://map.geoportail.lu/theme/main?X=680436&Y=6379094&zoom=18&bgLayer=basemap_2015_global&layers=359-1637&opacities=0-0&version=3"},"format":"png","layout":"thumbnail"}'>
+                <input type="submit" value="Submit">
+            </form>
         </div>
     </div>
 </div>
@@ -67,8 +71,10 @@ var map = new lux.Map({
   },
    showLayerInfoPopup : true,
    popupTarget: 'info',
-   layerInfoCallback: infoCb
+   layerInfoCallback: undefined,
+   queryableLayers: [359]
 });
+
 function geocode(e, term, item, clearButton) {
   lux.geocode({
     queryString: term
@@ -81,14 +87,16 @@ function removeInteractions() {
 }
 function addInteractions(typeSelect) {
     removeInteractions();
+    map.enableQueryOnClick(false);
+    map.enableQueryOnDrawEnd(true);
     if (typeSelect === 'Point') {
-        map.enableDrawPoint(function(drawendevent) {map.disableDrawTool();});
+        map.enableDrawPoint(function(drawendevent) {map.disableDrawTool();console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
     }
     if (typeSelect === 'Polygon') {
-        map.enableDrawPolygon(function(drawendevent) {map.disableDrawTool(); checkSelfIntersect(drawendevent.feature.getGeometry()); console.log(map.getGeometryLength(drawendevent.feature.getGeometry()));console.log(map.getGeometryArea(drawendevent.feature.getGeometry()));});
+        map.enableDrawPolygon(function(drawendevent) {map.disableDrawTool(); checkSelfIntersect(drawendevent.feature.getGeometry()); console.log(map.getGeometryLength(drawendevent.feature.getGeometry()));console.log(map.getGeometryArea(drawendevent.feature.getGeometry()));console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
     }
     if (typeSelect === 'LineString') {
-        map.enableDrawLine(function(drawendevent) {map.disableDrawTool();checkSelfIntersect(drawendevent.feature.getGeometry());});
+        map.enableDrawLine(function(drawendevent) {map.disableDrawTool();checkSelfIntersect(drawendevent.feature.getGeometry());console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
     }
 }
 
@@ -155,12 +163,12 @@ function exportgeojsonDrawingAndSection() {
 
 function checkSelfIntersect(geom) {
  if (lux.isSelfIntersecting(geom)) {
-    alert("Attenation géométrie avec une intersection");
+    alert("Attention géométrie avec une intersection");
  };
 };
 
 function printPDF() {
-  document.getElementById("imageId").src = "https://apiv3.geoportail.lu/printproxy/report_create_and_get.png?spec="+encodeURIComponent(JSON.stringify(map.getPrintSpec()));
+  document.getElementById("imageId").src = "http://apiv3.geoportail.lu/printproxy/report_create_and_get.png?spec="+encodeURIComponent(JSON.stringify(map.getPrintSpec()));
 }
 
 </script>
