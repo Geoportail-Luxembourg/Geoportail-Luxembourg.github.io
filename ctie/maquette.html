@@ -16,6 +16,10 @@
             <select id="geojsonfeature" onChange="selectGeoJsonFeature(this)"></select>
             <div id="layerManager" ></div><br>
             <div id="info"></div><br>
+            <button onclick="map.enableQueryOnClick(true);">Enable query on click</button><br>
+            <button onclick="map.enableQueryOnDrawEnd(true);">Enable query on draw end</button><br>
+            <button onclick="map.disableQueryOnClick(false);">Enable query on click</button><br>
+            <button onclick="map.disableQueryOnDrawEnd(false);">Enable query on draw end</button><br>
             <button onclick="exportgeojson()">Export Geojson selected element</button><br>
             <button onclick="exportgeojsondrawing()">Export Geojson drawings</button><br>
             <button onclick="exportgeojsonDrawingAndSection()">Export Geojson drawings and selection </button><br>
@@ -88,15 +92,14 @@ function removeInteractions() {
 function addInteractions(typeSelect) {
     removeInteractions();
     map.enableQueryOnClick(false);
-    map.enableQueryOnDrawEnd(true);
     if (typeSelect === 'Point') {
-        map.enableDrawPoint(function(drawendevent) {map.disableDrawTool();console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
+        map.enableDrawPoint(function(drawendevent) {map.disableDrawTool();console.log(drawendevent.feature.getGeometry());});
     }
     if (typeSelect === 'Polygon') {
-        map.enableDrawPolygon(function(drawendevent) {map.disableDrawTool(); checkSelfIntersect(drawendevent.feature.getGeometry()); console.log(map.getGeometryLength(drawendevent.feature.getGeometry()));console.log(map.getGeometryArea(drawendevent.feature.getGeometry()));console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
+        map.enableDrawPolygon(function(drawendevent) {map.disableDrawTool(); checkSelfIntersect(drawendevent.feature.getGeometry()); console.log(map.getGeometryLength(drawendevent.feature.getGeometry()));console.log(map.getGeometryArea(drawendevent.feature.getGeometry()));console.log(drawendevent.feature.getGeometry());});
     }
     if (typeSelect === 'LineString') {
-        map.enableDrawLine(function(drawendevent) {map.disableDrawTool();checkSelfIntersect(drawendevent.feature.getGeometry());console.log(drawendevent.feature.getGeometry());map.enableQueryOnClick(true);});
+        map.enableDrawLine(function(drawendevent) {map.disableDrawTool();checkSelfIntersect(drawendevent.feature.getGeometry());console.log(drawendevent.feature.getGeometry());});
     }
 }
 
