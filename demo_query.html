@@ -44,11 +44,38 @@ var map = new lux.Map({
    layerInfoCallback: selectParcelles,
    queryableLayers: [359]
 });
-var vectorLayer = map.createVectorLayer();
+map.enableShowSelectedFeature(false);
+var fillStyle = new ol.style.Fill({
+color: [255, 255, 0, 0.6]
+});
+
+var strokeStyle = new ol.style.Stroke({
+color: [255, 155, 55, 1],
+width: 3
+});
+
+var vectorStyle = new ol.style.Style({
+fill: fillStyle,
+stroke: strokeStyle
+});
+
+var vectorLayer = map.createVectorLayer(vectorStyle);
 
 function selectParcelles(arrayFeatures) {
+  if (arrayFeatures === undefined) {
+    console.log("undefined");
+    return;
+  }
   arrayFeatures.forEach(function(feature) {
-    vectorLayer.getSource().addFeatures([feature]);
+    var res = vectorLayer.getSource().getFeatures().filter(function(filter_feature) {
+        return (filter_feature.getProperties()['id'] == feature.getProperties()['id'])
+    });
+    if (res.length > 0) {
+      // If a feature with the same id is already in the layer the remove it
+        removeParcel(feature.getProperties()['id']);
+    } else {
+        vectorLayer.getSource().addFeatures([feature]);
+    }
   });
   refreshTable();
 }
