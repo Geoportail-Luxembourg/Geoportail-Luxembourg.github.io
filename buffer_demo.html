@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Draw Features</title>
+    <script src="//apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+        <script src="https://unpkg.com/jsts@2.0.2/dist/jsts.min.js"></script>
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+      <label>Geometry type &nbsp;</label>
+      <select id="type">
+        <option value="Point">Point</option>
+        <option value="Polygon">Polygon</option>
+        </select>
+    </form>
+    <button onclick="clearFeatures()">Clear</button>
+    <button onclick="createBuffer200()">RAYON 200m</button>
+    <script >
+      /*import Map from 'ol/Map.js';
+      import View from 'ol/View.js';
+      import Draw from 'ol/interaction/Draw.js';
+      import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+      import {OSM, Vector as VectorSource} from 'ol/source.js';
+      */
+      var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+
+      var source = new ol.source.Vector({wrapX: false});
+
+      var vector = new ol.layer.Vector({
+        source: source
+      });
+
+      var map = new lux.Map({
+         target: 'map',
+         bgLayer: 'orthogr_2013_global',
+         zoom: 18,
+         position: [75977, 75099]
+      });
+      map.addLayer(vector);
+
+      var typeSelect = document.getElementById('type');
+
+      var draw; // global so we can remove it later
+      function addInteraction() {
+        var value = typeSelect.value;
+        if (value !== 'None') {
+          draw = new ol.interaction.Draw({
+            source: source,
+            type: typeSelect.value
+          });
+          map.addInteraction(draw);
+        }
+      }
+
+
+      /**
+       * Handle change event.
+       */
+      typeSelect.onchange = function() {
+        map.removeInteraction(draw);
+        addInteraction();
+      };
+      addInteraction();
+    </script>
+    <script>
+      function createBuffer200(){
+         var parser = new jsts.io.OL3Parser();
+          parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
+          features = vector.getSource().getFeatures();
+          for (var i = 0; i < features.length; i++) {
+          var feature = features[i];
+          var jstsGeom = parser.read(feature.getGeometry());
+
+          // create a buffer of 40 meters around each line
+          var buffered = jstsGeom.buffer(200);
+
+          // convert back from JSTS and replace the geometry on the feature
+          source.addFeature(new ol.Feature({
+            geometry: parser.write(buffered)
+
+          }));
+          
+        }
+      }
+      function clearFeatures(){
+          source.clear();
+      }
+    </script>
+  </body>
+</html>

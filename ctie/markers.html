@@ -1,0 +1,89 @@
+<html>
+<script src="//apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+<body>
+<div id="map12"></div>
+<script>
+var map = new lux.Map({
+  target: 'map12',
+  bgLayer: 'basemap_2015_global',
+  zoom: 17
+});
+
+var markers = [];
+function pushMaker(marker) {
+    var foundMarkers = markers.filter(function(curMarker) {
+        if (curMarker.position[0] == marker.position[0] && curMarker.position[1] == marker.position[1]) {
+            return true;
+        }
+        return false;
+    });
+    if (foundMarkers.length === 0) {
+        // No marker at this position, then add a new one.
+        markers.push(marker);
+    }
+    if (foundMarkers.length > 0) {
+        // Marker already existes at this position, then update html field.
+        // Only one should exist
+        foundMarkers[0].html = foundMarkers[0].html + "<br>" + marker.html;
+    }
+}
+
+var promiseArray = [];
+promiseArray.push(lux.geocode({
+  num: 54,
+  street: 'avenue gaston diderich',
+  zip: 1420,
+  locality: 'luxembourg'
+}, function(position) {
+   pushMaker(
+   {
+    position: position,
+    autoCenter: true,
+    positioning: 'center-center',
+    iconURL: '//cdn.public.lu/skizz/img/maps/icon.png',
+    click: true,
+    html: "Enquiry 1"
+  });
+}));
+
+promiseArray.push (lux.geocode({
+  num: 54,
+  street: 'avenue gaston diderich',
+  zip: 1420,
+  locality: 'luxembourg'
+}, function(position) {
+  pushMaker({
+    position: position,
+    autoCenter: true,
+    positioning: 'center-center',
+    iconURL: '//cdn.public.lu/skizz/img/maps/icon.png',
+    click: true,
+    html: "Enquiry 2"
+  });
+}));
+
+promiseArray.push (lux.geocode({
+  num: 60,
+  street: 'avenue gaston diderich',
+  zip: 1420,
+  locality: 'luxembourg'
+}, function(position) {
+  pushMaker({
+    position: position,
+    autoCenter: true,
+    positioning: 'center-center',
+    iconURL: '//cdn.public.lu/skizz/img/maps/icon.png',
+    click: true,
+    html: "Enquiry 3"
+  });
+}));
+
+// Doit être exécuté quand tous les markers sont géocodés.
+Promise.all(promiseArray).then(function(){
+    markers.forEach(function(curMarker) {
+        map.showMarker(curMarker);
+    });
+});
+</script>
+</body>
+</html>

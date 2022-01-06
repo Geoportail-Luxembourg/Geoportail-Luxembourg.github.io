@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <script src="//apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="map1"></div>
+    <script>
+      var curMap = new lux.Map({
+        target: 'map1',
+        bgLayer: 'topo_bw_jpeg',
+        zoom: 12,
+        position: [76825, 75133]
+      });
+      curMap.addMyMapLayer({
+        mapId: 'e6bad5a61d6c419ca9b4d4a70e8a47bd'
+      });
+    </script>
+  </body>
+</html>

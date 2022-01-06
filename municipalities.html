@@ -1,0 +1,17 @@
+<html>
+  <head>
+    <script src="//apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="map1"></div>
+    <script>
+      var map = new lux.Map({
+        target: 'map1',
+        bgLayer: 'orthogr_2013_global',
+        zoom: 8,
+        position: [76825, 75133]
+      });
+      map.addGeoJSON('communes.geojson',{ click:true});
+    </script>
+  </body>
+</html>

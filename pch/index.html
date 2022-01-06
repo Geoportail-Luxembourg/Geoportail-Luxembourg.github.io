@@ -1,0 +1,33 @@
+<html xml:lang="fr" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <title>Test kml</title>
+  <script src="https://apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+</head>
+<body>
+
+<div id="map"></div>
+<script>
+
+var map = new lux.Map({
+  target: 'map',
+  bgLayer: 'basemap_2015_global',
+  position: [76825, 75133],
+  search      : {
+    target : 'map'
+}
+});
+var openUrl = function(features) {
+  var f = features.getArray();
+  if (f.length > 0) {
+    var description = f[0].get('description');
+    var el = document.createElement( 'html' );
+    el.innerHTML = description;
+    url = el.getElementsByTagName( 'a' )[0].href;
+    window.open(url, '_blank');
+  }
+}
+map.addKML('./Services.kml', {onClick: openUrl, click:true});
+</script>
+</body>
+</html>

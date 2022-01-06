@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>geoportail.lu API v3 samples</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="https://apiv3.geoportail.lu/apiv3loader.js"  type="text/javascript"></script>
+    <style>.maclasse {display:flex;align-items:center;}</style>
+</head>
+<body>
+<div id="map2c"></div>
+<div id="info2c"></div>
+ <script>
+var position = [75977, 75099 ];
+var map2c = new lux.Map({
+  position: position,
+  target: 'map2c',
+  bgLayer: 'basemap_2015_global',
+  zoom: 18
+});
+
+var overlay = map2c.showMarker(  
+  {
+   position: [75977, 75099 ],
+  positioning: 'center-center',
+   iconURL: '//apps.geoportail.lu/exemple_api/exemplesWikiGeoAPI/lion.png',
+   click: true,
+   html: '<h2>The popover</h2><p>With some content</p><ul><li>Item 1</li><li>Item 2</li></ul>'
+});
+
+var element = overlay.getElement();
+element.setAttribute('class','maclasse');
+var span =  document.createElement("span");
+var t = document.createTextNode("Le cadastre");
+span.appendChild(t);
+element.appendChild(span);
+</script>
+</body>
+</html>
+

@@ -1,0 +1,181 @@
+<html>
+<script src="//apiv3.geoportail.lu/apiv3loader.js" type="text/javascript"></script>
+<link type="text/css" rel="stylesheet" href="index.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+
+<body>
+<div id="govbar" class="govbar govbar-light "><a href="http://gouvernement.lu" target="_blank" class="govbar-logo"><img src="//cdn.public.lu/pictures/logos/gov/gov-light.png" alt="Gouvernement du Grand-Duché de Luxembourg"></a><ul class="govbar-links"><li><a class="govbar-link" href="http://luxembourg.lu/" target="_blank">luxembourg.lu</a></li><li><a class="govbar-link" href="http://guichet.lu/" target="_blank">guichet.lu</a></li><li><a class="govbar-link" href="http://gouvernement.lu/" target="_blank">gouvernement.lu</a></li><li><a class="govbar-link govbar-more" href="http://etat.lu/" title="L’annuaire des sites internets publics luxembourgeois" target="_blank">Autres sites</a></li></ul></div>
+<div class="container-fluid">
+    <div class="row">
+        <div id="map" class="col map"></div>
+        <div class="col">
+            <h1>Config panel</h1>
+            <label>Search</label><span id="search"></span><br>
+            <label>Url to a GeoJson file</label><input type="text" id="geojsonurl" value="https://map.geoportail.lu/mymaps/features/808e512e88f94c9fbe25ed3eae49895b"><button onclick="loadgeojson()">Import GeoJSON</button><br>
+            <select id="geojsonfeature" onChange="selectGeoJsonFeature(this)"></select>
+            <div id="layerManager" ></div><br>
+            <div id="info"></div><br>
+            <button onclick="map.enableQueryOnClick(true);">Enable query on click</button><br>
+            <button onclick="map.enableQueryOnDrawEnd(true);">Enable query on draw end</button><br>
+            <button onclick="map.enableQueryOnClick(false);">Disable query on click</button><br>
+            <button onclick="map.enableQueryOnDrawEnd(false);">Disable query on draw end</button><br>
+            <button onclick="exportgeojson()">Export Geojson selected element</button><br>
+            <button onclick="exportgeojsondrawing()">Export Geojson drawings</button><br>
+            <button onclick="exportgeojsonDrawingAndSection()">Export Geojson drawings and selection </button><br>
+            <button onclick="addInteractions('Point')">Draw a point</button><br>
+            <button onclick="addInteractions('Polygon')">Draw a polygon</button><br>
+            <button onclick="addInteractions('LineString')">Draw a line</button><br>
+            <button onclick="removeInteractions()">Deactivate drawing tool</button><br>
+            <button onclick="printPDF()">Get the image in PNG</button><br>
+            <form action="https://apiv3.geoportail.lu/printproxy/report_create_and_get.png" method="POST" target="_blank" id="postprint">
+                <input type="hidden" name="spec" id="postSpec" value='{"attributes":{"map":{"dpi":127,"rotation":0,"center":[680435.8701662207,6379093.714826083],"projection":"EPSG:3857","scale":1693,"layers":[{"baseURL":"https://vectortiles.geoportail.lu/styles/roadmap_jsapi","type":"OSM","imageExtension":"png"}]},"disclaimer":"www.geoportail.lu est un portail d accès aux informations géolocalisées, données et services qui sont mis à disposition par les administrations publiques luxembourgeoises. Responsabilité: Malgré la grande attention qu’elles portent à la justesse des informations diffusées sur ce site, les autorités ne peuvent endosser aucune responsabilité quant à la fidélité, à l’exactitude, à l’actualité, à la fiabilité et à l’intégralité de ces informations. Information dépourvue de foi publique. \nDroits d auteur: Administration du Cadastre et de la Topographie. http://g-o.lu/copyright","scaleTitle":"Echelle approximative 1:","appTitle":"Le géoportail national du Grand-Duché du Luxembourg","scale":1693,"name":"","lang":"fr","legend":"","scalebar":{"geodetic":true},"dataOwner":"","dateText":"Date d impression: ","url":"","qrimage":"https://apiv3.geoportail.lu/qr?url=https://map.geoportail.lu/theme/main?X=680436&Y=6379094&zoom=18&bgLayer=basemap_2015_global&layers=359-1637&opacities=0-0&version=3"},"format":"png","layout":"A4 landscape"}'>
+                <button onclick="printPost()">Print POST</button>
+            </form>
+            <image id = "imageId" src="" width="100px"></image>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+var geojsonlayer;
+function selectGeoJsonFeature(elem) {
+  geojsonlayer.then(function(layer) {
+    var featureId = elem.options[elem.selectedIndex].id;
+    var feature = layer.getSource().getFeatureById(featureId);
+    map.getView().fit(feature.getGeometry().getExtent(), {
+        size: map.getSize(),
+        maxZoom: 15
+    });
+  });
+}
+
+function infoCb(features) {
+  console.log(features[0].getProperties());
+}
+
+var map = new lux.Map({
+  layers: [ '1637','359'],
+  layerOpacities: [0.75, 0.8],
+  layerVisibilities: [false, false],
+  target: 'map',
+  bgLayer: 'basemap_2015_global',
+  zoom: 18,
+  position: [75977, 75099],
+  zoomToExtent: true,
+  search      : {
+    target : 'search',
+    dataSets : ['Adresse', 'FLIK', 'Parcelle', 'Commune'],
+    onSelect: function(e, term, item, clearButton) {
+        geocode(e, term, item, clearButton);
+       }.bind(this)
+  },
+  layerManager: {
+    target: 'layerManager'
+  },
+   showLayerInfoPopup : true,
+   popupTarget: 'info',
+   layerInfoCallback: undefined,
+   queryableLayers: [359]
+});
+
+function geocode(e, term, item, clearButton) {
+  lux.geocode({
+    queryString: term
+  }).then(function(resp){
+    console.log(resp.results[0].AddressDetails);
+  });
+}
+function removeInteractions() {
+    map.disableDrawTool();
+}
+function addInteractions(typeSelect) {
+    removeInteractions();
+    map.enableQueryOnClick(false);
+    if (typeSelect === 'Point') {
+        map.enableDrawPoint(function(drawendevent) {map.disableDrawTool();console.log(drawendevent.feature.getGeometry());});
+    }
+    if (typeSelect === 'Polygon') {
+        map.enableDrawPolygon(function(drawendevent) {map.disableDrawTool(); checkSelfIntersect(drawendevent.feature.getGeometry()); console.log(map.getGeometryLength(drawendevent.feature.getGeometry()));console.log(map.getGeometryArea(drawendevent.feature.getGeometry()));console.log(drawendevent.feature.getGeometry());});
+    }
+    if (typeSelect === 'LineString') {
+        map.enableDrawLine(function(drawendevent) {map.disableDrawTool();checkSelfIntersect(drawendevent.feature.getGeometry());console.log(drawendevent.feature.getGeometry());});
+    }
+}
+
+function loadgeojson() {
+    var style = {
+      'Point': new ol.style.Style({
+        image: new ol.style.Circle({
+          fill: new ol.style.Fill({
+            color: 'rgba(255,255,0,0.4)'
+          }),
+          radius: 5,
+          stroke: new ol.style.Stroke({
+            color: '#ff0',
+            width: 1
+          })
+        })
+      }),
+      'LineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#f00',
+          width: 3
+        })
+      }),
+      'MultiLineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#f00',
+          width: 3
+        })
+      }),
+      'Polygon': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: '#f00',
+          width: 3
+        })
+      })
+    };
+    var styleFunction = function(feature) {
+      return style[feature.getGeometry().getType()];
+    };
+   var url = document.getElementById('geojsonurl').value;
+   var onFeatureAdd = function(feature) {
+     var select = document.getElementById('geojsonfeature');
+     var option = document.createElement("option");
+     option.text = feature.get('name');
+     option.id = feature.getId()
+     select.add(option);
+   }
+   geojsonlayer = map.addGeoJSON(url, {dataProjection: 'EPSG:2169', style: styleFunction, name: 'Couche geojson', onFeatureAdd: onFeatureAdd});
+}
+
+function exportgeojson() {
+    var geojsonStr = map.exportGeoJSON(map.getShowLayer().getSource().getFeatures());
+    document.getElementById('info').innerHTML = geojsonStr;
+}
+function exportgeojsondrawing() {
+    var geojsonStr = map.exportGeoJSON(map.getDrawingLayer().getSource().getFeatures());
+    document.getElementById('info').innerHTML = geojsonStr;
+}
+function exportgeojsonDrawingAndSection() {
+    var array = map.getDrawingLayer().getSource().getFeatures().concat(map.getShowLayer().getSource().getFeatures());
+    var geojsonStr = map.exportGeoJSON(array);
+    document.getElementById('info').innerHTML = geojsonStr;
+}
+
+function checkSelfIntersect(geom) {
+ if (lux.isSelfIntersecting(geom)) {
+    alert("Attention géométrie avec une intersection");
+ };
+};
+
+function printPDF() {
+  document.getElementById("imageId").src = "http://apiv3.geoportail.lu/printproxy/report_create_and_get.png?spec="+encodeURIComponent(JSON.stringify(map.getPrintSpec()));
+}
+function printPost() {
+  document.getElementById("postSpec").value = JSON.stringify(map.getPrintSpec());
+  document.getElementById("postprint").submit();
+}
+</script>
+</html>
