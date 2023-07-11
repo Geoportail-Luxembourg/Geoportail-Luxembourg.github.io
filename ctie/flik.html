@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <script src="https://apiv4.geoportail.lu/apiv4loader.js" type="text/javascript"></script>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script>
+            var map = new lux.Map({
+                target: 'map',
+                bgLayer: 'basemap_2015_global',
+                layers: [1637],
+                layerOpacities: [1],
+                layerVisibilities: [true],
+                zoom: 18,
+                position: [76771, 72205],
+                features2    : {
+                    ids   : ['0947404'],
+                    layer : '1637',
+                    click: false,
+                    showMarke: false
+                }
+            });
+            var urlParameters = new URLSearchParams(window.location.search);
+            fliks = urlParameters.getAll('flik');
+            map.showFeatures(1637, fliks, false, undefined, false, undefined, undefined);
+            points = urlParameters.getAll('point');
+            var features = [];
+            for (var i in points) {
+                var p1 = parseInt(points[i].split(",")[0]);
+                var p2 = parseInt(points[i].split(",")[1])
+                var curPoint = new ol.geom.Point(ol.proj.transform([p1,p2], 'EPSG:2169', map.getView().getProjection()));
+                var curFeature = new ol.Feature({
+                    geometry: curPoint
+                });
+                features.push(curFeature)
+            }
+            map.getDrawingLayer().getSource().addFeatures(features);
+            //http://localhost:9080/?flik=0947404&flik=0945455&point=74220,90828&point=74279,90792&point=74175,90793
+        </script>
+    </body>
+</html>
