@@ -1,0 +1,23 @@
+<html>
+<head>
+<script src="https://apiv4.geoportail.lu/apiv4loader.js" type="text/javascript"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+<div id = 'lm'></div>
+<div id = 'map'></div>
+<script>
+var map = new lux.Map({
+  target: 'map',
+  bgLayer: 'basemap_2015_global',
+  bgLayerStyle: 'https://vectortiles.geoportail.lu/styles/gisgr_roadmap/style.json',
+  layers:[2710,2711],
+  zoom: 6,
+  position: [76771, 72205],
+  showLayerInfoPopup:true,
+  layerManager:{target:'lm'}
+});
+//map.addLayer(2710);
+//map.addLayer(2711);
+</script>
+</body>
