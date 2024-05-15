@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <meta name="description" content="Test">
+    <meta name="author" content="Geoportail">
+    <script src="https://apiv4.geoportail.lu/apiv4loader.js" type="text/javascript"></script>
+</head>
+<body>
+    <div id="map" style="height:500px;width: 500px;"></div>
+    <script>
+        var position = [77213, 71822];
+        var map = new lux.Map({
+                target: 'map',
+                bgLayer: 'basemap_2015_global'
+            });
+
+        function generateRandomNumber(min, max) {
+            const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+            return randomNumber;
+        } 
+        let features = [];
+        for (var i=0;i<50;i++) {
+
+            let feature = new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.transform([generateRandomNumber(48697, 112781), generateRandomNumber(53713, 112781)], 'EPSG:2169', 'EPSG:3857')),
+                name: 'Feature : ' + i
+            });
+            let iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(({
+                anchor: [0.5, 46],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                src: 'https://apiv4.geoportail.lu/proj/1.0/build/apidoc/examples/icon.png'
+            }))
+            });
+            feature.setStyle(iconStyle);
+            features.push(feature)
+        }
+        let vectorSource = new ol.source.Vector({
+                features: features
+            });
+        let vectorLayer = new ol.layer.Vector({
+            source: vectorSource
+        });
+        map.on('click', function(evt) {
+            var feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+        });
+        if (feature !== undefined) {
+            alert(feature.get('name'));
+        } else {
+            //Do nothing
+        }
+    });
+
+    map.addLayer(vectorLayer);
+    </script>
+</body>
+</html>
